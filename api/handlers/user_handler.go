@@ -1,18 +1,35 @@
 package api
 
 import (
-	"github.com/devdesignersid/hotel-reservation/types"
+	"context"
+
+	"github.com/devdesignersid/hotel-reservation/db"
 	"github.com/gofiber/fiber/v2"
 )
 
-func HandleGetUsers(c *fiber.Ctx) error {
-	u := types.User{
-		FirstName: "Sid",
-		LastName:  "S Kumar",
-	}
-	return c.JSON(u)
+type UserHandler struct {
+	userStore db.UserStore
 }
 
-func HandleGetUser(c *fiber.Ctx) error {
+func NewUserHandler(userStore db.UserStore) *UserHandler {
+	return &UserHandler{
+		userStore: userStore,
+	}
+}
+
+func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
+	var (
+		id  = c.Params("id")
+		ctx = context.Background()
+	)
+
+	user, err := h.userStore.GetUserById(ctx, id)
+	if err != nil {
+		return err
+	}
+	return c.JSON(user)
+}
+
+func (h *UserHandler) HandleGetUsers(c *fiber.Ctx) error {
 	return c.JSON(map[string]string{"name": "Sid"})
 }
